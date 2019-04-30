@@ -19,23 +19,23 @@ def process_training_data(num_clips):
     """
     num_prev_clips = len(glob(c.TRAIN_DIR_CLIPS + '*'))
 
-    for clip_num in xrange(num_prev_clips, num_clips + num_prev_clips):
+    for clip_num in range(num_prev_clips, num_clips + num_prev_clips):
         clip = process_clip()
-
+        
         np.savez_compressed(c.TRAIN_DIR_CLIPS + str(clip_num), clip)
 
-        if (clip_num + 1) % 100 == 0: print 'Processed %d clips' % (clip_num + 1)
+        if (clip_num + 1) % 100 == 0: print ('Processed %d clips' % (clip_num + 1))
 
 
 def usage():
-    print 'Options:'
-    print '-n/--num_clips= <# clips to process for training> (Default = 5000000)'
-    print '-t/--train_dir= <Directory of full training frames>'
-    print '-c/--clips_dir= <Save directory for processed clips>'
-    print "                (I suggest making this a hidden dir so the filesystem doesn't freeze"
-    print "                 with so many files. DON'T `ls` THIS DIRECTORY!)"
-    print '-o/--overwrite  (Overwrites the previous data in clips_dir)'
-    print '-H/--help       (Prints usage)'
+    print ('Options:')
+    print ('-n/--num_clips= <# clips to process for training> (Default = 5000000)')
+    print ('-t/--train_dir= <Directory of full training frames>')
+    print ('-c/--clips_dir= <Save directory for processed clips>')
+    print ("                (I suggest making this a hidden dir so the filesystem doesn't freeze")
+    print ("                 with so many files. DON'T `ls` THIS DIRECTORY!)")
+    print ('-o/--overwrite  (Overwrites the previous data in clips_dir)')
+    print ('-H/--help       (Prints usage)')
 
 
 def main():

@@ -69,7 +69,7 @@ class DScaleModel:
                 conv_bs = []
                 last_out_height = self.height
                 last_out_width = self.width
-                for i in xrange(len(self.kernel_sizes)):
+                for i in range(len(self.kernel_sizes)):
                     conv_ws.append(w([self.kernel_sizes[i],
                                       self.kernel_sizes[i],
                                       self.conv_layer_fms[i],
@@ -86,11 +86,11 @@ class DScaleModel:
                 # Add in an initial layer to go from the last conv to the first fully-connected.
                 # Use /2 for the height and width because there is a 2x2 pooling layer
                 self.fc_layer_sizes.insert(
-                    0, (last_out_height / 2) * (last_out_width / 2) * self.conv_layer_fms[-1])
+                    0, (last_out_height // 2) * (last_out_width // 2) * self.conv_layer_fms[-1])
 
                 fc_ws = []
                 fc_bs = []
-                for i in xrange(len(self.fc_layer_sizes) - 1):
+                for i in range(len(self.fc_layer_sizes) - 1):
                     fc_ws.append(w([self.fc_layer_sizes[i],
                                     self.fc_layer_sizes[i + 1]]))
                     fc_bs.append(b([self.fc_layer_sizes[i + 1]]))
@@ -112,7 +112,7 @@ class DScaleModel:
 
                 # convolutions
                 with tf.name_scope('convolutions'):
-                    for i in xrange(len(conv_ws)):
+                    for i in range(len(conv_ws)):
                         # Convolve layer and activate with ReLU
                         preds = tf.nn.conv2d(
                             last_input, conv_ws[i], [1, 1, 1, 1], padding=c.PADDING_D)
@@ -131,7 +131,7 @@ class DScaleModel:
 
                 # fully-connected layers
                 with tf.name_scope('fully-connected'):
-                    for i in xrange(len(fc_ws)):
+                    for i in range(len(fc_ws)):
                         preds = tf.matmul(preds, fc_ws[i]) + fc_bs[i]
 
                         # Activate with ReLU (or Sigmoid for last layer)

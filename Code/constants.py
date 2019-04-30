@@ -70,23 +70,18 @@ def set_test_dir(directory):
 # root directory for all data
 DATA_DIR = get_dir('../Data/')
 # directory of unprocessed training frames
-TRAIN_DIR = os.path.join(DATA_DIR, 'Ms_Pacman/Train/')
+TRAIN_DIR = os.path.join(DATA_DIR, 'catz/train/')
 # directory of unprocessed test frames
-TEST_DIR = os.path.join(DATA_DIR, 'Ms_Pacman/Test/')
-# Directory of processed training clips.
-# hidden so finder doesn't freeze w/ so many files. DON'T USE `ls` COMMAND ON THIS DIR!
-TRAIN_DIR_CLIPS = get_dir(os.path.join(DATA_DIR, '.Clips/'))
+TEST_DIR = os.path.join(DATA_DIR, 'catz/test/')
 
 # For processing clips. l2 diff between frames must be greater than this
 MOVEMENT_THRESHOLD = 100
-# total number of processed clips in TRAIN_DIR_CLIPS
-NUM_CLIPS = len(glob(TRAIN_DIR_CLIPS + '*'))
 
 # the height and width of the full frames to test on. Set in avg_runner.py or process_data.py main.
-FULL_HEIGHT = 210
-FULL_WIDTH = 160
+FULL_HEIGHT = 96
+FULL_WIDTH = 96
 # the height and width of the patches to train on
-TRAIN_HEIGHT = TRAIN_WIDTH = 32
+TRAIN_HEIGHT = TRAIN_WIDTH = 96
 
 ##
 # Output
@@ -128,8 +123,8 @@ IMG_SAVE_DIR = get_dir(os.path.join(SAVE_DIR, 'Images/', SAVE_NAME))
 
 
 STATS_FREQ      = 10     # how often to print loss/train error stats, in # steps
-SUMMARY_FREQ    = 100    # how often to save the summaries, in # steps
-IMG_SAVE_FREQ   = 1000   # how often to save generated images, in # steps
+SUMMARY_FREQ    = 10    # how often to save the summaries, in # steps
+IMG_SAVE_FREQ   = 100   # how often to save generated images, in # steps
 TEST_FREQ       = 5000   # how often to test the model on test data, in # steps
 MODEL_SAVE_FREQ = 10000  # how often to save the model, in # steps
 
@@ -142,7 +137,7 @@ ADVERSARIAL = True
 # the training minibatch size
 BATCH_SIZE = 8
 # the number of history frames to give as input to the network
-HIST_LEN = 4
+HIST_LEN = 5
 
 ##
 # Loss parameters

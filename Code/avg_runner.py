@@ -3,10 +3,38 @@ import getopt
 import sys
 import os
 
-from utils import get_train_batch, get_test_batch
+from utils import data
 import constants as c
 from g_model import GeneratorModel
 from d_model import DiscriminatorModel
+
+from keras.layers import Conv2D, UpSampling2D, MaxPooling2D
+from keras.models import Sequential
+from keras.callbacks import Callback
+import random
+import wandb
+from wandb.keras import WandbCallback
+import subprocess
+import os
+import numpy as np
+from keras import backend as K
+
+run = wandb.init(project='catz')
+config = run.config
+
+config.num_epochs = 100
+config.batch_size = c.BATCH_SIZE
+config.img_dir = "images"
+config.height = c.TRAIN_HEIGHT
+config.width = c.TRAIN_WIDTH
+
+def perceptual_distance(y_true, y_pred):
+    rmean = (y_true[:, :, :, 0] + y_pred[:, :, :, 0]) / 2
+    r = y_true[:, :, :, 0] - y_pred[:, :, :, 0]
+    g = y_true[:, :, :, 1] - y_pred[:, :, :, 1]
+    b = y_true[:, :, :, 2] - y_pred[:, :, :, 2]
+    
+    return K.mean(K.sqrt((((512+rmean)*r*r)/256) + 4*g*g + (((767-rmean)*b*b)/256)))
 
 
 class AVGRunner:
@@ -27,10 +55,15 @@ class AVGRunner:
         self.num_test_rec = num_test_rec
 
         self.sess = tf.Session()
-        self.summary_writer = tf.train.SummaryWriter(c.SUMMARY_SAVE_DIR, graph=self.sess.graph)
+        self.summary_writer = tf.summary.FileWriter(c.SUMMARY_SAVE_DIR, graph=self.sess.graph)
+
+        # Init data collection
+        print( 'Init data...')
+        self.train_data = data(c.TRAIN_DIR)
+        self.test_data = data(c.TEST_DIR)
 
         if c.ADVERSARIAL:
-            print 'Init discriminator...'
+            print( 'Init discriminator...')
             self.d_model = DiscriminatorModel(self.sess,
                                               self.summary_writer,
                                               c.TRAIN_HEIGHT,
@@ -39,7 +72,7 @@ class AVGRunner:
                                               c.SCALE_KERNEL_SIZES_D,
                                               c.SCALE_FC_LAYER_SIZES_D)
 
-        print 'Init generator...'
+        print( 'Init generator...')
         self.g_model = GeneratorModel(self.sess,
                                       self.summary_writer,
                                       c.TRAIN_HEIGHT,
@@ -49,41 +82,41 @@ class AVGRunner:
                                       c.SCALE_FMS_G,
                                       c.SCALE_KERNEL_SIZES_G)
 
-        print 'Init variables...'
+        print( 'Init variables...')
         self.saver = tf.train.Saver(keep_checkpoint_every_n_hours=2)
         self.sess.run(tf.global_variables_initializer())
 
         # if load path specified, load a saved model
         if model_load_path is not None:
             self.saver.restore(self.sess, model_load_path)
-            print 'Model restored from ' + model_load_path
+            print( 'Model restored from ' + model_load_path)
 
     def train(self):
         """
         Runs a training loop on the model networks.
         """
-        for i in xrange(self.num_steps):
+        for i in range(self.num_steps):
             if c.ADVERSARIAL:
                 # update discriminator
-                batch = get_train_batch()
-                print 'Training discriminator...'
+                batch = self.train_data.get_batch(c.BATCH_SIZE)
+                print( 'Training discriminator...')
                 self.d_model.train_step(batch, self.g_model)
 
             # update generator
-            batch = get_train_batch()
-            print 'Training generator...'
+            batch = self.train_data.get_batch(c.BATCH_SIZE)
+            print( 'Training generator...')
             self.global_step = self.g_model.train_step(
                 batch, discriminator=(self.d_model if c.ADVERSARIAL else None))
 
             # save the models
             if self.global_step % c.MODEL_SAVE_FREQ == 0:
-                print '-' * 30
-                print 'Saving models...'
+                print( '-' * 30)
+                print( 'Saving models...')
                 self.saver.save(self.sess,
                                 c.MODEL_SAVE_DIR + 'model.ckpt',
                                 global_step=self.global_step)
-                print 'Saved models!'
-                print '-' * 30
+                print( 'Saved models!')
+                print( '-' * 30)
 
             # test generator model
             if self.global_step % c.TEST_FREQ == 0:
@@ -93,27 +126,26 @@ class AVGRunner:
         """
         Runs one test step on the generator network.
         """
-        batch = get_test_batch(c.BATCH_SIZE, num_rec_out=self.num_test_rec)
+        batch = self.test_data(c.BATCH_SIZE)
         self.g_model.test_batch(
             batch, self.global_step, num_rec_out=self.num_test_rec)
 
-
 def usage():
-    print 'Options:'
-    print '-l/--load_path=    <Relative/path/to/saved/model>'
-    print '-t/--test_dir=     <Directory of test images>'
-    print '-r/--recursions=   <# recursive predictions to make on test>'
-    print '-a/--adversarial=  <{t/f}> (Whether to use adversarial training. Default=True)'
-    print '-n/--name=         <Subdirectory of ../Data/Save/*/ in which to save output of this run>'
-    print '-s/--steps=        <Number of training steps to run> (Default=1000001)'
-    print '-O/--overwrite     (Overwrites all previous data for the model with this save name)'
-    print '-T/--test_only     (Only runs a test step -- no training)'
-    print '-H/--help          (Prints usage)'
-    print '--stats_freq=      <How often to print loss/train error stats, in # steps>'
-    print '--summary_freq=    <How often to save loss/error summaries, in # steps>'
-    print '--img_save_freq=   <How often to save generated images, in # steps>'
-    print '--test_freq=       <How often to test the model on test data, in # steps>'
-    print '--model_save_freq= <How often to save the model, in # steps>'
+    print( 'Options:')
+    print( '-l/--load_path=    <Relative/path/to/saved/model>')
+    print( '-t/--test_dir=     <Directory of test images>')
+    print( '-r/--recursions=   <# recursive predictions to make on test>')
+    print( '-a/--adversarial=  <{t/f}> (Whether to use adversarial training. Default=True)')
+    print( '-n/--name=         <Subdirectory of ../Data/Save/*/ in which to save output of this run>')
+    print( '-s/--steps=        <Number of training steps to run> (Default=1000001)')
+    print( '-O/--overwrite     (Overwrites all previous data for the model with this save name)')
+    print( '-T/--test_only     (Only runs a test step -- no training)')
+    print( '-H/--help          (print(s usage)')
+    print( '--stats_freq=      <How often to print( loss/train error stats, in # steps>')
+    print( '--summary_freq=    <How often to save loss/error summaries, in # steps>')
+    print( '--img_save_freq=   <How often to save generated images, in # steps>')
+    print( '--test_freq=       <How often to test the model on test data, in # steps>')
+    print( '--model_save_freq= <How often to save the model, in # steps>')
 
 
 def main():
@@ -169,7 +201,7 @@ def main():
     # set test frame dimensions
     assert os.path.exists(c.TEST_DIR)
     c.FULL_HEIGHT, c.FULL_WIDTH = c.get_test_frame_dims()
-
+    
     ##
     # Init and run the predictor
     ##
