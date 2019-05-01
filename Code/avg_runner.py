@@ -19,23 +19,8 @@ import os
 import numpy as np
 from keras import backend as K
 
-run = wandb.init(project='catz')
+run = wandb.init(project='catz', tensorboard=True)
 config = run.config
-
-config.num_epochs = 100
-config.batch_size = c.BATCH_SIZE
-config.img_dir = "images"
-config.height = c.TRAIN_HEIGHT
-config.width = c.TRAIN_WIDTH
-
-def perceptual_distance(y_true, y_pred):
-    rmean = (y_true[:, :, :, 0] + y_pred[:, :, :, 0]) / 2
-    r = y_true[:, :, :, 0] - y_pred[:, :, :, 0]
-    g = y_true[:, :, :, 1] - y_pred[:, :, :, 1]
-    b = y_true[:, :, :, 2] - y_pred[:, :, :, 2]
-    
-    return K.mean(K.sqrt((((512+rmean)*r*r)/256) + 4*g*g + (((767-rmean)*b*b)/256)))
-
 
 class AVGRunner:
     def __init__(self, num_steps, model_load_path, num_test_rec):
@@ -156,10 +141,10 @@ def main():
     # Handle command line input.
     ##
 
+    num_steps = 1000001
     load_path = None
     test_only = False
     num_test_rec = 1  # number of recursive predictions to make on test
-    num_steps = 1000001
     try:
         opts, _ = getopt.getopt(sys.argv[1:], 'l:t:r:a:n:s:OTH',
                                 ['load_path=', 'test_dir=', 'recursions=', 'adversarial=', 'name=',
@@ -208,6 +193,14 @@ def main():
     ##
     # Init and run the predictor
     ##
+
+    # wandb config
+    config.num_epochs = num_steps//6706
+    config.batch_size = c.BATCH_SIZE
+    config.img_dir = "images"
+    config.height = c.TRAIN_HEIGHT
+    config.width = c.TRAIN_WIDTH
+
 
     runner = AVGRunner(num_steps, load_path, num_test_rec)
     if test_only:
