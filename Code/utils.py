@@ -73,7 +73,7 @@ class data():
         # load all images
         for i in range(0, len(cat_dirs)):
             input_imgs = glob(cat_dirs[i] + "/cat_*")
-            imgs = [imread(img) for img in sorted(input_imgs)]
+            imgs = [imread(img, mode='RGB') for img in sorted(input_imgs)]
             self.images[i] = normalize_frames(np.concatenate(imgs, axis=2))
             
         self.i = 0
