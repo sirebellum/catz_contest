@@ -83,7 +83,7 @@ class data():
         i = self.i
         self.i += batch_size
         
-        return self.images[i:i+batch_size]
+        return np.take(self.images, range(i, i+batch_size), axis=0, mode='wrap')
 
 
 ##
