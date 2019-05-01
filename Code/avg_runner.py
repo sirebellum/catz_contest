@@ -114,7 +114,7 @@ class AVGRunner:
         """
         Runs one test step on the generator network.
         """
-        batch = self.test_data(c.BATCH_SIZE)
+        batch = self.test_data.get_batch(c.BATCH_SIZE)
         self.g_model.test_batch(
             batch, self.global_step, num_rec_out=self.num_test_rec)
 
