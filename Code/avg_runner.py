@@ -55,8 +55,11 @@ class AVGRunner:
         self.num_test_rec = num_test_rec
 
         self.sess = tf.Session()
-        self.summary_writer = tf.summary.FileWriter(c.SUMMARY_SAVE_DIR, graph=self.sess.graph)
-
+        self.summary_writer = tf.summary.FileWriter(
+                                c.SUMMARY_SAVE_DIR, 
+                                graph=self.sess.graph,
+                                flush_secs=30)
+        
         # Init data collection
         print( 'Init data...')
         self.train_data = data(c.TRAIN_DIR)
