@@ -93,6 +93,14 @@ class data():
 # TODO: Add SSIM error http://www.cns.nyu.edu/pub/eero/wang03-reprint.pdf
 # TODO: Unit test error functions.
 
+def perceptual_distance(y_true, y_pred):
+    rmean = (y_true[:, :, :, 0] + y_pred[:, :, :, 0]) / 2
+    r = y_true[:, :, :, 0] - y_pred[:, :, :, 0]
+    g = y_true[:, :, :, 1] - y_pred[:, :, :, 1]
+    b = y_true[:, :, :, 2] - y_pred[:, :, :, 2]
+    
+    return K.mean(K.sqrt((((512+rmean)*r*r)/256) + 4*g*g + (((767-rmean)*b*b)/256)))
+
 def psnr_error(gen_frames, gt_frames):
     """
     Computes the Peak Signal to Noise Ratio error between the generated images and the ground
