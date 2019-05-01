@@ -73,7 +73,7 @@ class data():
         # load all images
         for i in range(0, len(cat_dirs)):
             input_imgs = glob(cat_dirs[i] + "/cat_*")
-            imgs = [Image.open(img) for img in sorted(input_imgs)]
+            imgs = [imread(img) for img in sorted(input_imgs)]
             self.images[i] = normalize_frames(np.concatenate(imgs, axis=2))
             
         self.i = 0
@@ -82,6 +82,7 @@ class data():
     
         i = self.i
         self.i += batch_size
+        
         return self.images[i:i+batch_size]
 
 
