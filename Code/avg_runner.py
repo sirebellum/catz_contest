@@ -195,7 +195,7 @@ def main():
     ##
 
     # wandb config
-    config.num_epochs = num_steps//6706
+    config.num_epochs = num_steps*c.BATCH_SIZE//6706
     config.batch_size = c.BATCH_SIZE
     config.img_dir = "images"
     config.height = c.TRAIN_HEIGHT
