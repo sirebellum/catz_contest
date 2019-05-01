@@ -94,10 +94,16 @@ class data():
 # TODO: Unit test error functions.
 
 def perceptual_distance(gen_frames, gt_frames):
-    rmean = (gen_frames[:, :, :, 0] + gt_frames[:, :, :, 0]) / 2
-    r = gen_frames[:, :, :, 0] - gt_frames[:, :, :, 0]
-    g = gen_frames[:, :, :, 1] - gt_frames[:, :, :, 1]
-    b = gen_frames[:, :, :, 2] - gt_frames[:, :, :, 2]
+    # Preprocess back to normal images
+    y_pred = gen_frames + 1
+    y_true = gt_frames + 1
+    y_pred *= (255 / 2)
+    y_true *= (255 / 2)
+
+    rmean = (y_true[:, :, :, 0] + y_pred[:, :, :, 0]) / 2
+    r = y_true[:, :, :, 0] - y_pred[:, :, :, 0]
+    g = y_true[:, :, :, 1] - y_pred[:, :, :, 1]
+    b = y_true[:, :, :, 2] - y_pred[:, :, :, 2]
     
     return tf.reduce_mean(tf.sqrt((((512+rmean)*r*r)/256) + 4*g*g + (((767-rmean)*b*b)/256)))
 
