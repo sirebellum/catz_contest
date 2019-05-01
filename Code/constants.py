@@ -74,8 +74,6 @@ TRAIN_DIR = os.path.join(DATA_DIR, 'catz/train/')
 # directory of unprocessed test frames
 TEST_DIR = os.path.join(DATA_DIR, 'catz/test/')
 
-# For processing clips. l2 diff between frames must be greater than this
-MOVEMENT_THRESHOLD = 100
 
 # the height and width of the full frames to test on. Set in avg_runner.py or process_data.py main.
 FULL_HEIGHT = 96
