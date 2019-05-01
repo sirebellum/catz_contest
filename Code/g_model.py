@@ -7,7 +7,7 @@ import os
 
 import constants as c
 from loss_functions import combined_loss
-from utils import psnr_error, sharp_diff_error
+from utils import psnr_error, sharp_diff_error, perceptual_distance
 from tfutils import w, b
 
 # noinspection PyShadowingNames
@@ -214,19 +214,32 @@ class GeneratorModel:
                                                   self.gt_frames_test)
                 self.sharpdiff_error_test = sharp_diff_error(self.scale_preds_test[-1],
                                                              self.gt_frames_test)
+                self.perceptual_distance_train = perceptual_distance(self.scale_preds_train[-1],
+                                                   self.gt_frames_train)
+                self.perceptual_distance_test = perceptual_distance(self.scale_preds_test[-1],
+                                                             self.gt_frames_test)
+                
                 # train error summaries
                 summary_psnr_train = tf.summary.scalar('train_PSNR',
                                                        self.psnr_error_train)
                 summary_sharpdiff_train = tf.summary.scalar('train_SharpDiff',
                                                             self.sharpdiff_error_train)
-                self.summaries_train += [summary_psnr_train, summary_sharpdiff_train]
+                summary_pd_train = tf.summary.scalar('perceptual_distance',
+                                                     self.perceptual_distance_train)
+                self.summaries_train += [summary_psnr_train, 
+                                         summary_sharpdiff_train, 
+                                         summary_pd_train]
 
                 # test error
                 summary_psnr_test = tf.summary.scalar('test_PSNR',
                                                       self.psnr_error_test)
                 summary_sharpdiff_test = tf.summary.scalar('test_SharpDiff',
                                                            self.sharpdiff_error_test)
-                self.summaries_test += [summary_psnr_test, summary_sharpdiff_test]
+                summary_pd_test = tf.summary.scalar('val_perceptual_distance',
+                                                     self.perceptual_distance_test)
+                self.summaries_test += [summary_psnr_test, 
+                                        summary_sharpdiff_test, 
+                                        summary_pd_test]
 
             # add summaries to visualize in TensorBoard
             self.summaries_train = tf.summary.merge(self.summaries_train)
@@ -270,11 +283,12 @@ class GeneratorModel:
             for i, preds in enumerate(d_scale_preds):
                 feed_dict[self.d_scale_preds[i]] = preds
 
-        _, global_loss, global_psnr_error, global_sharpdiff_error, global_step, summaries = \
+        _, global_loss, global_psnr_error, global_sharpdiff_error, global_perceptual_distance, global_step, summaries = \
             self.sess.run([self.train_op,
                            self.global_loss,
                            self.psnr_error_train,
                            self.sharpdiff_error_train,
+                           self.perceptual_distance_train,
                            self.global_step,
                            self.summaries_train],
                           feed_dict=feed_dict)
@@ -287,6 +301,7 @@ class GeneratorModel:
             print( '                 Global Loss    : ', global_loss)
             print( '                 PSNR Error     : ', global_psnr_error)
             print( '                 Sharpdiff Error: ', global_sharpdiff_error)
+            print( '                 PD             : ', global_perceptual_distance)
         if global_step % c.SUMMARY_FREQ == 0:
             self.summary_writer.add_summary(summaries, global_step)
             print( 'GeneratorModel: saved summaries')

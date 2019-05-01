@@ -93,13 +93,13 @@ class data():
 # TODO: Add SSIM error http://www.cns.nyu.edu/pub/eero/wang03-reprint.pdf
 # TODO: Unit test error functions.
 
-def perceptual_distance(y_true, y_pred):
-    rmean = (y_true[:, :, :, 0] + y_pred[:, :, :, 0]) / 2
-    r = y_true[:, :, :, 0] - y_pred[:, :, :, 0]
-    g = y_true[:, :, :, 1] - y_pred[:, :, :, 1]
-    b = y_true[:, :, :, 2] - y_pred[:, :, :, 2]
+def perceptual_distance(gen_frames, gt_frames):
+    rmean = (gen_frames[:, :, :, 0] + gt_frames[:, :, :, 0]) / 2
+    r = gen_frames[:, :, :, 0] - gt_frames[:, :, :, 0]
+    g = gen_frames[:, :, :, 1] - gt_frames[:, :, :, 1]
+    b = gen_frames[:, :, :, 2] - gt_frames[:, :, :, 2]
     
-    return K.mean(K.sqrt((((512+rmean)*r*r)/256) + 4*g*g + (((767-rmean)*b*b)/256)))
+    return tf.reduce_mean(tf.sqrt((((512+rmean)*r*r)/256) + 4*g*g + (((767-rmean)*b*b)/256)))
 
 def psnr_error(gen_frames, gt_frames):
     """
