@@ -190,7 +190,9 @@ class GeneratorModel:
                                                  self.scale_gts_train,
                                                  self.d_scale_preds)
                 self.global_step = tf.Variable(0, trainable=False)
-                self.optimizer = tf.train.AdamOptimizer(learning_rate=c.LRATE_G, name='optimizer')
+                self.optimizer = tf.train.AdamOptimizer(learning_rate=c.LRATE_G, 
+                                                        epsilon=c.LEPSILON_G, 
+                                                        name='optimizer')
                 self.train_op = self.optimizer.minimize(self.global_loss,
                                                         global_step=self.global_step,
                                                         name='train_op')
