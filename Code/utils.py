@@ -66,16 +66,24 @@ class data():
         cat_dirs = glob(path + "*")
         random.shuffle(cat_dirs)
         
-        # Image buffer
+        # load all images
         self.images = np.zeros(
             (len(cat_dirs), c.FULL_HEIGHT, c.FULL_WIDTH, 3 * (c.HIST_LEN + 1)))
-        
-        # load all images
         for i in range(0, len(cat_dirs)):
             input_imgs = glob(cat_dirs[i] + "/cat_*")
             imgs = [imread(img, mode='RGB') for img in sorted(input_imgs)]
             self.images[i] = normalize_frames(np.concatenate(imgs, axis=2))
+        
+        if 'train' in path:
+            # more images via horizontal flip
+            n, x, y, z = self.images.shape
+            self.images.resize((n*2, x, y, z))
+            for i in range(n, n*2):
+                self.images[i] = np.fliplr(self.images[i-n])
             
+            #shuffle
+            np.random.shuffle(self.images)
+        
         self.i = 0
         
     def get_batch(self, batch_size):
