@@ -452,7 +452,7 @@ class GeneratorModel:
 
             wandb.log({
             "input": [wandb.Image(np.concatenate(np.split(i, c.HIST_LEN, axis=2), axis=1)) for i in input_frames],
-            "output": [wandb.Image(np.concatenate([gt_frames[i], rec_preds[0][i]], axis=1)) for i in range(num_rec_out)]
+            "output": [wandb.Image(np.concatenate([gt_frames[i], rec_preds[0][i]], axis=1)) for i in range(len(gt_frames))]
             }, commit=False)
 
         print( '-' * 30)
