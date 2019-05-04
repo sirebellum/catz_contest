@@ -5,6 +5,7 @@ from scipy.ndimage import imread
 from glob import glob
 import os
 import random
+import cv2
 
 import constants as c
 from tfutils import log10
@@ -74,15 +75,10 @@ class data():
             imgs = [imread(img, mode='RGB') for img in sorted(input_imgs)]
             self.images[i] = normalize_frames(np.concatenate(imgs, axis=2))
         
+        # datset
+        self.mode = 'test'
         if 'train' in path:
-            # more images via horizontal flip
-            n, x, y, z = self.images.shape
-            self.images.resize((n*2, x, y, z))
-            for i in range(n, n*2):
-                self.images[i] = np.fliplr(self.images[i-n])
-            
-            #shuffle
-            np.random.shuffle(self.images)
+            self.mode = 'train'
         
         self.i = 0
         
@@ -91,7 +87,34 @@ class data():
         i = self.i
         self.i += batch_size
         
-        return np.take(self.images, range(i, i+batch_size), axis=0, mode='wrap')
+        batch = np.take(self.images, range(i, i+batch_size), axis=0, mode='wrap')
+        
+        # perform random data alterations
+        if self.mode == 'train':
+        
+            # horizontal flip
+            indices = np.random.randint(0, batch_size, (batch_size//3))
+            batch[indices] = np.fliplr(batch[indices])
+            
+            # crop and resize
+            indices = np.random.randint(0, batch_size, (batch_size//3))
+            lcrops = np.random.randint(
+                        0, 
+                        int(c.FULL_HEIGHT*0.2), 
+                        (batch_size//3))
+            hcrops = np.random.randint(
+                        int(c.FULL_HEIGHT*0.8), 
+                        c.FULL_HEIGHT, 
+                        (batch_size//3))
+            for x, i in enumerate(indices):
+                new = batch[i,
+                           lcrops[x]:hcrops[x],
+                           lcrops[x]:hcrops[x],
+                           :]
+                new = cv2.resize(new, (c.FULL_HEIGHT, c.FULL_WIDTH)).copy()
+                batch[i] = new
+            
+        return batch
 
 
 ##
