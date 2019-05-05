@@ -112,6 +112,8 @@ class data():
                            lcrops[x]:hcrops[x],
                            :]
                 new = cv2.resize(new, (c.FULL_HEIGHT, c.FULL_WIDTH)).copy()
+                if np.amax(new) > 1 or np.amin(new) < -1: # If we get a bad image, discard
+                    continue
                 batch[i] = new
             
         return batch
