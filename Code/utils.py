@@ -101,11 +101,11 @@ class data():
             lcrops = np.random.randint(
                         0, 
                         int(c.FULL_HEIGHT*0.2), 
-                        (batch_size//3))
+                        (batch_size//2))
             hcrops = np.random.randint(
                         int(c.FULL_HEIGHT*0.8), 
                         c.FULL_HEIGHT, 
-                        (batch_size//3))
+                        (batch_size//2))
             for x, i in enumerate(indices):
                 new = batch[i,
                            lcrops[x]:hcrops[x],
