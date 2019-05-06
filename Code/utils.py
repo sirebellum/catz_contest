@@ -75,6 +75,8 @@ class data():
             imgs = [imread(img, mode='RGB') for img in sorted(input_imgs)]
             self.images[i] = normalize_frames(np.concatenate(imgs, axis=2))
         
+        self.instances = len(self.images)
+        
         # datset
         self.mode = 'test'
         if 'train' in path:
@@ -82,7 +84,11 @@ class data():
         
         self.i = 0
         
-    def get_batch(self, batch_size):
+    def get_batch(self, batch_size=None):
+    
+        # Get all images if no batch_size supplied
+        if batch_size is None:
+            batch_size = self.instances
     
         i = self.i
         self.i += batch_size
