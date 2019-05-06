@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+from utils import perceptual_distance
 
 from tfutils import log10
 import constants as c
@@ -26,6 +27,12 @@ def combined_loss(gen_frames, gt_frames, d_preds, lam_adv=c.LAM_ADV, lam_lp=c.LA
     loss = lam_lp * lp_loss(gen_frames, gt_frames, l_num)
     loss += lam_gdl * gdl_loss(gen_frames, gt_frames, alpha)
     if c.ADVERSARIAL: loss += lam_adv * adv_loss(d_preds, tf.ones([batch_size, 1]))
+    
+    # Perceptual distance
+    p_loss = 0
+    for i in range(len(gt_frames)):
+        p_loss += perceptual_distance(gen_frames[i], gt_frames[i])
+    loss += 10 * p_loss
 
     return loss
 
