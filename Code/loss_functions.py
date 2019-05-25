@@ -30,8 +30,8 @@ def combined_loss(gen_frames, gt_frames, d_preds, lam_adv=c.LAM_ADV, lam_lp=c.LA
     
     # Perceptual distance
     p_loss = 0
-    for i in range(len(gt_frames)):
-        p_loss += perceptual_distance(gen_frames[i], gt_frames[i])
+    for i in range(len(gt_frames[-1])):
+        p_loss += perceptual_distance(gen_frames[-1][i], gt_frames[-1][i])
     loss += 10 * p_loss
 
     return loss
