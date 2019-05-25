@@ -90,6 +90,11 @@ class data():
         if batch_size is None:
             batch_size = self.instances
     
+        # Shuffle if we've gone through the database once
+        if self.i >= self.instances:
+            self.i = 0
+            np.random.shuffle(self.images)
+    
         i = self.i
         self.i += batch_size
         
