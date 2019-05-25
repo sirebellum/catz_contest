@@ -181,10 +181,18 @@ class GeneratorModel:
                         self.scale_preds_test.append(test_preds)
                         self.scale_gts_test.append(test_gts)
             
-            # Concat and convolve
-            concatpreds = tf.concat([self.input_frames_train, self.scale_preds_train[-1]], 3)
+            # Concat and convolve TRAIN
+            concat_train = tf.concat([self.input_frames_train, self.scale_preds_train[-1]], 3)
             self.scale_preds_train[-1] = tf.nn.conv2d(
-                concatpreds, 
+                concat_train, 
+                w([3,3,(c.HIST_LEN+1)*3,3]),
+                [1,1,1,1], 
+                padding="SAME")
+                
+            # Concat and convolve TEST
+            concat_test = tf.concat([self.input_frames_test, self.scale_preds_test[-1]], 3)
+            self.scale_preds_test[-1] = tf.nn.conv2d(
+                concat_test, 
                 w([3,3,(c.HIST_LEN+1)*3,3]),
                 [1,1,1,1], 
                 padding="SAME")
