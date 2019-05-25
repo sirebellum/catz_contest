@@ -29,7 +29,7 @@ def combined_loss(gen_frames, gt_frames, d_preds, lam_adv=c.LAM_ADV, lam_lp=c.LA
     if c.ADVERSARIAL: loss += lam_adv * adv_loss(d_preds, tf.ones([batch_size, 1]))
     
     # Perceptual distance
-    loss += 10 * perceptual_distance(gen_frames[-1], gt_frames[-1])
+    loss += 100 * perceptual_distance(gen_frames[-1], gt_frames[-1])
 
     return loss
 
