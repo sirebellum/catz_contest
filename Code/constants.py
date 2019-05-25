@@ -133,7 +133,7 @@ MODEL_SAVE_FREQ = 10000  # how often to save the model, in # steps
 # whether to use adversarial training vs. basic training of the generator
 ADVERSARIAL = True
 # the training minibatch size
-BATCH_SIZE = 8
+BATCH_SIZE = 32
 # the number of history frames to give as input to the network
 HIST_LEN = 5
 
@@ -146,19 +146,19 @@ L_NUM = 2
 # the power to which each gradient term is raised in GDL loss
 ALPHA_NUM = 1
 # the percentage of the adversarial loss to use in the combined loss
-LAM_ADV = 0.05
+LAM_ADV = 0
 # the percentage of the lp loss to use in the combined loss
-LAM_LP = 1
+LAM_LP = 0.1
 # the percentage of the GDL loss to use in the combined loss
-LAM_GDL = 1
+LAM_GDL = 0.1
 
 ##
 # Generator model
 ##
 
 # learning rate for the generator model
-LRATE_G = 0.00004  # Value in paper is 0.04
-LEPSILON_G = 1e-3
+LRATE_G = 0.0001  # Value in paper is 0.04
+LEPSILON_G = 1e-1
 # padding for convolutions in the generator model
 PADDING_G = 'SAME'
 # feature maps for each convolution of each scale network in the generator model
