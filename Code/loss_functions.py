@@ -29,10 +29,10 @@ def combined_loss(gen_frames, gt_frames, d_preds, lam_adv=c.LAM_ADV, lam_lp=c.LA
     if c.ADVERSARIAL: loss += lam_adv * adv_loss(d_preds, tf.ones([batch_size, 1]))
     
     # Perceptual distance
-    p_loss = 0
+    p_loss = []
     for i in range(len(gt_frames[-1])):
-        p_loss += perceptual_distance(gen_frames[-1][i], gt_frames[-1][i])
-    loss += 10 * p_loss
+        p_loss.append( perceptual_distance(gen_frames[-1][i], gt_frames[-1][i]) )
+    loss += 10 * tf.reduce_mean(tf.stack(p_loss))
 
     return loss
 
