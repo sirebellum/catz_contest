@@ -180,7 +180,15 @@ class GeneratorModel:
                                                          last_scale_pred_test)
                         self.scale_preds_test.append(test_preds)
                         self.scale_gts_test.append(test_gts)
-
+            
+            # Concat and convolve
+            concatpreds = tf.concat([self.input_frames_train, self.scale_preds_train[-1]], 3)
+            self.scale_preds_train[-1] = tf.nn.conv2d(
+                concatpreds, 
+                w([3,3,(c.HIST_LEN+1)*3,3]),
+                [1,1,1,1], 
+                padding="SAME")
+            
             ##
             # Training
             ##
@@ -197,7 +205,6 @@ class GeneratorModel:
                 self.train_op = self.optimizer.minimize(self.global_loss,
                                                         global_step=self.global_step,
                                                         name='train_op')
-
                 # train loss summary
                 loss_summary = tf.summary.scalar('train_loss_G', self.global_loss)
                 self.summaries_train.append(loss_summary)
