@@ -208,9 +208,20 @@ class GeneratorModel:
                                                  self.scale_gts_train,
                                                  self.d_scale_preds)
                 self.global_step = tf.Variable(0, trainable=False)
-                self.optimizer = tf.train.AdamOptimizer(learning_rate=c.LRATE_G, 
-                                                        epsilon=c.LEPSILON_G, 
+                self.optimizer = tf.train.AdamOptimizer(learning_rate=c.LRATE_G,
+                                                        epsilon=c.LEPSILON_G,
                                                         name='optimizer')
+                '''
+                self.lr = tf.train.exponential_decay(learning_rate=c.LRATE_G,
+                                                global_step=self.global_step,
+                                                decay_steps=5000,
+                                                decay_rate=0.1,
+                                                staircase=True)
+                self.optimizer = tf.train.MomentumOptimizer(learning_rate=self.lr,
+                                                            momentum=9e-1,
+                                                            use_nesterov=True,
+                                                            name='optimizer')
+                '''
                 self.train_op = self.optimizer.minimize(self.global_loss,
                                                         global_step=self.global_step,
                                                         name='train_op')
@@ -267,6 +278,9 @@ class GeneratorModel:
         self.summaries_train.append(summary_pd_train)
         self.summaries_test.append(summary_pd_test)
         
+        lr_summary = tf.summary.scalar('learning_rate_G', self.lr)
+        self.summaries_train.append(lr_summary)
+
         # add summaries to visualize in TensorBoard
         self.summaries_train = tf.summary.merge(self.summaries_train)
         self.summaries_test = tf.summary.merge(self.summaries_test)
